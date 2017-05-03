@@ -24,7 +24,6 @@ const Observable = Rx.Observable;
 
 ```javascript
 const Rx = require('rxjs');
-const Observable = Rx.Observable;
 
 // alternatively : let source = Rx.Observable.create(()=>{})
 let source = new Rx.Observable((observer) => {
@@ -206,12 +205,27 @@ Sub1 - done
 > Subscribing to an Observable is analogous to calling a Function.
 
 ```javascript
+var source = Rx.Observable.create(function (observer) {
+  observer.next('Sync Value 1');
+  observer.next('Sync Value 2');
+
+});
+console.log('created Observable');
+setTimeout(function() {
+  source.subscribe((z) => {
+    console.log(z);
+  })
+}, 1000);
+console.log('Declared setTimeout');
 
 ```
 Output
 
 ```javascript
-
+created Observable
+Declared setTimeout
+Sync Value 1
+Sync Value 2
 ```
 ### - Multiple Subscribers
 > Observables are lazily executed when new subscribers are connected.
