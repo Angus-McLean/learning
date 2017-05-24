@@ -7,12 +7,12 @@
 *    **Let's get started!***
 
 
-## **SSL with Docker by hand**
+## **SSL with Docker (manually)**
 ### 1. Setup a persistent Data Volume Container
 
 ```bash
 # Create named data volume container and mount volume /certs
-docker create -v /certs --name envartifacts ubuntu
+docker create -v /artifacts/certs:/certs --name envartifacts ubuntu
 ```
 ### 2. Create self-signed certificate with Ubuntu Container
 
@@ -20,6 +20,7 @@ docker create -v /certs --name envartifacts ubuntu
 # Run docker container
 docker run -i -t --volumes-from envartifacts ubuntu /bin/bash
 
+## This should start a shell session inside the ubuntu docker container
 # Initialize the package cache and install opensll
 apt-get -qq update
 apt-get install openssl -y
@@ -30,6 +31,8 @@ openssl req -out /certs/server.csr -new -newkey rsa:2048 -sha256 -nodes -keyout 
 
 # Self sign the csr to create a signed certificate (crt)
 openssl x509 -req -sha256 -days 365 -in /certs/server.csr -signkey /certs/server.key -out /certs/server.crt
+
+## Press Ctrl-D to exit current docker container
 ```
 ### 3. Configure Nginx Container
 
@@ -44,8 +47,35 @@ server {
     ## Other Nginx Directives ##
 }
 ```
+### 4. Configure docker-compose file
 
+```bash
+services:
+  nginx_frontend:
+    ## Docker Directives ##
+    volumes:
+      - /artifacts/certs:/certs
+    ports:
+      - "80:80"
+      - "443:443"
+ 
+## OR : mount the data volume container ##
 
+services:
+  nginx_frontend:
+    ## Docker Directives ##
+    volumes_from:
+      - container:envartifacts 
+    ports:
+      - "80:80"
+      - "443:443"
+  ## The rest of Docker Directives ##
+```
+### 5. Feel like a God
+
+```bash
+docker-compose up
+```
 ## **Automated SSL in DevEnv (self-signed)**
 
 
